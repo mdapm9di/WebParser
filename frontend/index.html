@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebParser</title>
+    <link rel="stylesheet" href="src/styles/css/style.css">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Блок 1: Ссылки для парсинга (полная ширина) -->
+        <div class="section full-width">
+            <h2>Ссылки для парсинга</h2>
+            <div class="setting-group">
+                <label>Введите ссылку:</label>
+                <div id="urls-container">
+                    <div class="url-row">
+                        <input type="text" class="url-input" placeholder="https://example.com">
+                        <button class="remove-url-btn" style="display: none;">-</button>
+                    </div>
+                </div>
+            </div>
+            <button id="add-url-btn">+ Добавить URL</button>
+        </div>
+
+        <div class="divider"></div>
+        
+        <!-- Блоки 2 и 3: Настройки для парсинга (две колонки) -->
+        <div class="settings-columns">
+            <!-- Колонка 1 -->
+            <div class="section">
+                <h2>Настройки селектора</h2>
+                <div class="setting-group">
+                    <label for="selector-type">Выберите тип селектора:</label>
+                    <select id="selector-type">
+                        <option value="tag">tag (div, p, span, a, h1 и т.д.)</option>
+                        <option value="class">class (.class-name)</option>
+                        <option value="id">id (#element-id)</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="selector-values">Названия через запятую:</label>
+                    <input type="text" id="selector-values" placeholder="div, p, a">
+                </div>
+            </div>
+            
+            <!-- Колонка 2 -->
+            <div class="section">
+                <h2>Способ извлечения</h2>
+                <div class="setting-group">
+                    <div class="radio-group">
+                        <input type="radio" id="auto-mode" name="extract-mode" value="auto" checked>
+                        <label for="auto-mode">Автоматический</label>
+                        <input type="radio" id="manual-mode" name="extract-mode" value="manual">
+                        <label for="manual-mode">Ручной</label>
+                    </div>
+                </div>
+                
+                <div id="auto-extract-group" class="setting-group">
+                    <label for="auto-extract-types">Выбранные способы извлекаемых данных:</label>
+                    <input type="text" id="auto-extract-types" disabled>
+                </div>
+                
+                <div id="manual-extract-group" class="setting-group" style="display: none;">
+                    <label for="extract-types">Типы извлечения (через запятую):</label>
+                    <input type="text" id="extract-types" placeholder="txt, img, video">
+                </div>
+            </div>
+        </div>
+        
+        <button id="parse-btn" class="primary-btn">Начать парсинг</button>
+        
+        <div class="divider"></div>
+        
+        <!-- Блок 5: Результаты парсинга (полная ширина) -->
+        <div class="section full-width">
+            <h2>Результат парсинга</h2>
+            <div id="results">
+                <div id="status-bar" class="status-ready">Готов к работе</div>
+                <div id="output"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Блок 4: Режим сохранения -->
+        <div class="section full-width">
+            <h2>Режим сохранения</h2>
+            <div class="setting-group">
+                <div class="radio-group">
+                    <input type="radio" id="save-auto" name="save-mode" value="auto" checked>
+                    <label for="save-auto">Сохранять автоматически</label>
+                    <input type="radio" id="save-manual" name="save-mode" value="manual">
+                    <label for="save-manual">Сохранять вручную</label>
+                </div>
+            </div>
+            <div class="setting-group">
+                <div class="save-options">
+                    <select id="save-format">
+                        <option value="json">Сохранить в .json</option>
+                        <option value="csv">Сохранить в .csv</option>
+                    </select>
+                    <button id="save-btn" class="secondary-btn" disabled>Сохранить в .json</button>
+                </div>
+            </div>
+        </div>
+
+    <script src="src/js/content-extractor-ui.js"></script>
+    <script src="src/js/renderer.js"></script>
+</body>
+</html>
