@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "name": "webparser",
   "version": "1.0.0",
@@ -27,4 +28,35 @@
     "all": "^0.0.0",
     "axios": "1.12.0"
   }
+=======
+{
+  "name": "webparser",
+  "version": "1.0.0",
+  "description": "WebParser is a cross-platform desktop application for website parsing. Extracts text, images, and videos using preset selectors with the ability to save results automatically or manually.",
+  "main": "frontend/main.js",
+  "scripts": {
+    "build-css": "sass frontend/src/styles/scss:frontend/src/styles/css --watch --no-source-map",
+    "build-css-once": "sass frontend/src/styles/scss:frontend/src/styles/css --no-source-map",
+    "start": "concurrently \"npm run build-css\" \"electron .\"",
+    "build": "npm run build-css-once && electron-builder",
+    "dev": "concurrently \"npm run build-css\" \"python backend/app.py\" \"wait-on http://localhost:5000 && electron .\"",
+    "install-deps": "pip install -r requirements.txt",
+    "install-all": "npm install && npm run install-deps",
+    "dev-fix": "concurrently \"npm run build-css\" \"python backend/app.py\" \"wait-on http://localhost:5000/ && electron .\"",
+    "dev-with-flask": "concurrently \"npm run build-css\" \"electron .\""
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "concurrently": "9.2.1",
+    "electron": "38.1.0",
+    "electron-builder": "26.0.20",
+    "postcss": "^8.5.6",
+    "sass": "^1.77.2",
+    "wait-on": "8.0.4"
+  },
+  "dependencies": {
+    "all": "^0.0.0",
+    "axios": "1.12.0"
+  }
+>>>>>>> db3846bf44b3226c4095a015d7a96d1f900c7abe
 }
