@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 document.addEventListener('DOMContentLoaded', function() {
     const selectorTypeSelect = document.getElementById('selector-type');
     const selectorValuesInput = document.getElementById('selector-values');
@@ -177,7 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     updateExtractType();
     updateSaveButtonText();
-=======
 document.addEventListener('DOMContentLoaded', function() {
     const selectorTypeSelect = document.getElementById('selector-type');
     const selectorValuesInput = document.getElementById('selector-values');
@@ -356,5 +354,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     updateExtractType();
     updateSaveButtonText();
->>>>>>> db3846bf44b3226c4095a015d7a96d1f900c7abe
 });
