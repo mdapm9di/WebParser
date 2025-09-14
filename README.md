@@ -1,8 +1,7 @@
 # WebParser
+A cross-platform desktop application for parsing websites built with Electron (Frontend) and Python/Flask (Backend). Extract text, images, and video data from web pages using CSS selectors with an intuitive GUI interface.
 
 ![screenshot](https://github.com/mdapm9di/WebParser/blob/main/preview.jpg)
-
-A cross-platform desktop application for parsing websites built with Electron (Frontend) and Python/Flask (Backend). Extract text, images, and video data from web pages using CSS selectors with an intuitive GUI interface.
 
 ## Appeal to all
 This app is a personal project that I am creating for myself. I would be happy if it was useful to someone else, and I am always open to suggestions on how to improve it. Any help and constructive criticism is most welcome
