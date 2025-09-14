@@ -9,13 +9,53 @@ from collections import OrderedDict
 from src.utils.network_utils import get_page_content, create_session
 from src.utils.language_utils import detect_language, ensure_russian_language
 
-
 class AdvancedWebParser:
     def __init__(self):
         self.session = create_session()
         self.results = []
         self.language = "unknown"
         self.encoding = "utf-8"
+        
+    def get_page_content_playwright(self, url):
+        """Получение контента страницы через Playwright с улучшенным ожиданием"""
+        try:
+            from playwright.sync_api import sync_playwright
+            
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                context = browser.new_context(
+                    viewport={'width': 1920, 'height': 1080},
+                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                )
+                page = context.new_page()
+                
+                # Увеличиваем таймаут и ждем полной загрузки
+                page.goto(url, wait_until='domcontentloaded', timeout=60000)
+                
+                # Ждем полной загрузки страницы и выполнения JavaScript
+                page.wait_for_load_state('networkidle', timeout=30000)
+                
+                # Дополнительное ожидание для динамического контентa
+                page.wait_for_timeout(5000)
+                
+                # Прокручиваем страницу для загрузки ленивого контента
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                page.wait_for_timeout(5000)
+                
+                # Получаем HTML после выполнения JavaScript
+                html = page.content()
+                
+                browser.close()
+                return html, 'utf-8'
+                
+        except Exception as e:
+            print(f"Ошибка Playwright для {url}: {str(e)}")
+            # Fallback на традиционный метод
+            try:
+                html, encoding = self.get_page_content(self.session, url)
+                return html, encoding
+            except:
+                return None, 'utf-8'
         
     def parse_elements(self, html, selector_type, selector_values, extract_type, attribute=None):
         """Парсинг элементов по выбранным селекторам с улучшенным форматированием"""
@@ -74,9 +114,11 @@ class AdvancedWebParser:
                 
                 if selector_type in ['class', 'id']:
                     if extract_type == 'image' and elem.name != 'img':
-                        result_data['warning'] = f"Элемент с {selector_type} '{selector_value}' не является тегом img, а является {elem.name}. Изображение не будет извлечено."
+                        # Больше не показываем предупреждение, так как теперь ищем изображения рекурсивно
+                        pass
                     elif extract_type == 'video' and elem.name != 'video':
-                        result_data['warning'] = f"Элемент с {selector_type} '{selector_value}' не является тегом video, а является {elem.name}. Видео не будет извлечено."
+                        # Больше не показываем предупреждение, так как теперь ищем видео рекурсивно
+                        pass
                 
                 if extract_type == 'text':
                     structure = self.get_children_structure(elem)
@@ -158,38 +200,14 @@ class AdvancedWebParser:
         try:
             structure = []
             
-            if element.name == 'img':
-                src = element.get('src', '')
-                srcset = element.get('srcset', '')
-                classes = element.get('class', [])
-                class_str = ' '.join(classes) if classes else None
-                id_str = element.get('id', '')
-                
-                if src:
-                    structure.append(OrderedDict([
-                        ('tag', 'img'),
-                        ('class', class_str),
-                        ('id', id_str),
-                        ('src', src)
-                    ]))
-                
-                if srcset:
-                    srcset_urls = [url.strip().split(' ')[0] for url in srcset.split(',') if url.strip()]
-                    for url in srcset_urls:
-                        structure.append(OrderedDict([
-                            ('tag', 'img'),
-                            ('class', class_str),
-                            ('id', id_str),
-                            ('src', url)
-                        ]))
-            else:
-                images = element.find_all('img')
-                for img in images:
-                    src = img.get('src', '')
-                    srcset = img.get('srcset', '')
-                    classes = img.get('class', [])
+            def extract_images_recursive(elem):
+                """Рекурсивно извлекает все изображения из элемента"""
+                if elem.name == 'img':
+                    src = elem.get('src', '')
+                    srcset = elem.get('srcset', '')
+                    classes = elem.get('class', [])
                     class_str = ' '.join(classes) if classes else None
-                    id_str = img.get('id', '')
+                    id_str = elem.get('id', '')
                     
                     if src:
                         structure.append(OrderedDict([
@@ -198,7 +216,7 @@ class AdvancedWebParser:
                             ('id', id_str),
                             ('src', src)
                         ]))
-                        
+                    
                     if srcset:
                         srcset_urls = [url.strip().split(' ')[0] for url in srcset.split(',') if url.strip()]
                         for url in srcset_urls:
@@ -209,6 +227,15 @@ class AdvancedWebParser:
                                 ('src', url)
                             ]))
                 
+                # Рекурсивно обрабатываем всех потомков
+                if hasattr(elem, 'children'):
+                    for child in elem.children:
+                        if child.name:
+                            extract_images_recursive(child)
+            
+            # Начинаем рекурсивный поиск с переданного элемента
+            extract_images_recursive(element)
+                    
             return structure
         except Exception as e:
             print(f"Ошибка при извлечении данных изображения: {e}")
@@ -219,51 +246,14 @@ class AdvancedWebParser:
         try:
             structure = []
             
-            if element.name == 'video':
-                src = element.get('src', '')
-                poster = element.get('poster', '')
-                classes = element.get('class', [])
-                class_str = ' '.join(classes) if classes else None
-                id_str = element.get('id', '')
-                
-                if src:
-                    structure.append(OrderedDict([
-                        ('tag', 'video'),
-                        ('class', class_str),
-                        ('id', id_str),
-                        ('src', src)
-                    ]))
-                
-                if poster:
-                    structure.append(OrderedDict([
-                        ('tag', 'video'),
-                        ('class', class_str),
-                        ('id', id_str),
-                        ('src', poster)
-                    ]))
-                
-                sources = element.find_all('source')
-                for source in sources:
-                    source_src = source.get('src', '')
-                    source_classes = source.get('class', [])
-                    source_class_str = ' '.join(source_classes) if source_classes else None
-                    source_id = source.get('id', '')
-                    
-                    if source_src:
-                        structure.append(OrderedDict([
-                            ('tag', 'source'),
-                            ('class', source_class_str),
-                            ('id', source_id),
-                            ('src', source_src)
-                        ]))
-            else:
-                videos = element.find_all('video')
-                for video in videos:
-                    src = video.get('src', '')
-                    poster = video.get('poster', '')
-                    classes = video.get('class', [])
+            def extract_videos_recursive(elem):
+                """Рекурсивно извлекает все видео из элемента"""
+                if elem.name == 'video':
+                    src = elem.get('src', '')
+                    poster = elem.get('poster', '')
+                    classes = elem.get('class', [])
                     class_str = ' '.join(classes) if classes else None
-                    id_str = video.get('id', '')
+                    id_str = elem.get('id', '')
                     
                     if src:
                         structure.append(OrderedDict([
@@ -281,7 +271,7 @@ class AdvancedWebParser:
                             ('src', poster)
                         ]))
                     
-                    sources = video.find_all('source')
+                    sources = elem.find_all('source')
                     for source in sources:
                         source_src = source.get('src', '')
                         source_classes = source.get('class', [])
@@ -296,6 +286,15 @@ class AdvancedWebParser:
                                 ('src', source_src)
                             ]))
                 
+                # Рекурсивно обрабатываем всех потомков
+                if hasattr(elem, 'children'):
+                    for child in elem.children:
+                        if child.name:
+                            extract_videos_recursive(child)
+            
+            # Начинаем рекурсивный поиск с переданного элемента
+            extract_videos_recursive(element)
+                    
             return structure
         except Exception as e:
             print(f"Ошибка при извлечении данных видео: {e}")

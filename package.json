@@ -1,6 +1,6 @@
 {
   "name": "webparser",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "WebParser is a cross-platform desktop application for website parsing. Extracts text, images, and videos using preset selectors with the ability to save results automatically or manually.",
   "main": "frontend/main.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "start": "concurrently \"npm run build-css\" \"electron .\"",
     "build": "npm run build-css-once && electron-builder",
     "dev": "concurrently \"npm run build-css\" \"python backend/app.py\" \"wait-on http://localhost:5000 && electron .\"",
-    "install-deps": "pip install -r requirements.txt",
+    "install-deps": "pip install -r requirements.txt && python -m playwright install",
     "install-all": "npm install && npm run install-deps",
     "dev-fix": "concurrently \"npm run build-css\" \"python backend/app.py\" \"wait-on http://localhost:5000/ && electron .\"",
     "dev-with-flask": "concurrently \"npm run build-css\" \"electron .\""
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "all": "^0.0.0",
-    "axios": "1.12.0"
+    "axios": "1.12.0",
+    "playwright": "^1.55.0"
   }
 }

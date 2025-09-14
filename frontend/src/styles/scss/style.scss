@@ -293,34 +293,33 @@ button {
 .settings-columns {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   margin-bottom: 5px;
 }
 
 .save-options {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-
-  select, button {
-    flex: 1;
-  }
-
-  button {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-  }
+  grid-template-columns: repeat(2, 1fr); /* Равномерное распределение на 3 колонки */
+  gap: 10px;
 }
 
-@media (min-width: 480px) {
-  .settings-columns {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  body {
-    padding: 20px;
-  }
+.save-options select,
+.save-options button {
+  min-width: 0; /* Важно для корректного сжатия элементов */
+}
+
+.save-options button {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.format-selector-hidden {
+  display: none !important;
+}
+
+/* Когда скрыт 1 элемент, растягиваем остальные на 2 колонки */
+.save-options .format-selector-hidden ~ * {
+  grid-column: span 3; /* Оставшиеся элементы занимают 2 колонки */
 }

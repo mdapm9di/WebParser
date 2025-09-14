@@ -36,7 +36,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow({
     width: 400,
-    height: 910,
+    height: 950,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -61,7 +61,7 @@ function createWindow() {
   
   mainWindow.on('closed', () => {
     if (flaskProcess) {
-      flaskProcess.kill();
+      flaskProcess.kill('SIGTERM');
       flaskProcess = null;
     }
   });
@@ -71,7 +71,7 @@ app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (flaskProcess) {
-    flaskProcess.kill();
+    flaskProcess.kill('SIGTERM');
     flaskProcess = null;
   }
   
@@ -80,10 +80,30 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('before-quit', () => {
+app.on('before-quit', (event) => {
+  // Отменяем немедленный выход
+  event.preventDefault();
+  
   if (flaskProcess) {
-    flaskProcess.kill();
-    flaskProcess = null;
+    // Убиваем процесс и ждем его завершения
+    flaskProcess.kill('SIGTERM');
+    
+    // Ждем завершения процесса перед выходом
+    flaskProcess.once('exit', () => {
+      flaskProcess = null;
+      app.exit(0);
+    });
+    
+    // Таймаут на случай, если процесс не завершится
+    setTimeout(() => {
+      if (flaskProcess) {
+        flaskProcess.kill('SIGKILL');
+        flaskProcess = null;
+        app.exit(0);
+      }
+    }, 3000);
+  } else {
+    app.exit(0);
   }
 });
 

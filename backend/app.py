@@ -9,22 +9,14 @@ import json
 import os
 import traceback
 
-
-
 app = Flask(__name__)
 CORS(app)
 
-
-
 parser = AdvancedWebParser()
-
-
 
 @app.route('/')
 def index():
     return jsonify({'status': 'ok', 'message': 'Web Parser API is running'})
-
-
 
 @app.route('/parse', methods=['POST'])
 def parse_urls():
@@ -35,6 +27,7 @@ def parse_urls():
         selector_type = data.get('selector_type', 'tag')
         selector_values = data.get('selector_values', [])
         extract_types = data.get('extract_types', ['text'])
+        parse_mode = data.get('parse_mode', 'playwright')  # Новый параметр
         
         if not urls:
             return jsonify({'error': 'Введите хотя бы один URL'}), 400
@@ -45,7 +38,7 @@ def parse_urls():
         if isinstance(extract_types, str):
             extract_types = [extract_types]
         
-        results = parse_urls_thread(urls, selector_type, selector_values, extract_types)
+        results = parse_urls_thread(urls, selector_type, selector_values, extract_types, parse_mode)
         
         response = app.response_class(
             response=json.dumps({
@@ -61,14 +54,17 @@ def parse_urls():
     except Exception as e:
         return jsonify({'error': str(e), 'traceback': traceback.format_exc()}), 500
 
-
-
-def parse_urls_thread(urls, selector_type, selector_values, extract_types):
+def parse_urls_thread(urls, selector_type, selector_values, extract_types, parse_mode):
     all_results = []
     
     for url in urls:
         try:
-            html, encoding = parser.get_page_content(parser.session, url)
+            # Используем выбранный режим парсинга
+            if parse_mode == 'playwright':
+                html, encoding = parser.get_page_content_playwright(url)
+            else:
+                html, encoding = parser.get_page_content(parser.session, url)
+                
             if not html:
                 all_results.append(OrderedDict([
                     ("url", url),
@@ -80,6 +76,16 @@ def parse_urls_thread(urls, selector_type, selector_values, extract_types):
             
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html, 'html.parser')
+            
+            # Дополнительная проверка на динамический контент
+            if not soup.find_all(selector_values[0] if selector_values else []):
+                # Пробуем обновить страницу и подождать еще
+                if parse_mode == 'playwright':
+                    html, encoding = parser.get_page_content_playwright(url)
+                else:
+                    html, encoding = parser.get_page_content(parser.session, url)
+                soup = BeautifulSoup(html, 'html.parser')
+            
             page_text = soup.get_text()
             language = parser.detect_language(page_text)
             
@@ -130,8 +136,23 @@ def parse_urls_thread(urls, selector_type, selector_values, extract_types):
     
     return all_results
 
-
-
 if __name__ == '__main__':
+    # Автоматическая установка браузеров Playwright при первом запуске
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            browser.close()
+        print("Playwright браузеры уже установлены")
+    except:
+        print("Установка браузеров Playwright...")
+        import subprocess
+        result = subprocess.run(['python', '-m', 'playwright', 'install', '--with-deps'], 
+                              capture_output=True, text=True)
+        if result.returncode == 0:
+            print("Браузеры Playwright успешно установлены")
+        else:
+            print(f"Ошибка установки браузеров: {result.stderr}")
+    
     debug = os.environ.get('FLASK_ENV') != 'production'
     app.run(debug=debug, host='0.0.0.0', port=5000, use_reloader=debug)

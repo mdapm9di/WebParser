@@ -17,7 +17,7 @@ def create_session():
 def get_page_content(session, url):
     """Загрузка содержимого страницы с определением кодировки"""
     try:
-        print("Загрузка страницы...")
+        print("Загрузка страницы через requests...")
         response = session.get(url, timeout=15)
         response.raise_for_status()
         

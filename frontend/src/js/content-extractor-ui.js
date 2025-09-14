@@ -7,9 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const manualExtractGroup = document.getElementById('manual-extract-group');
     const autoExtractTypesInput = document.getElementById('auto-extract-types');
     const extractTypesInput = document.getElementById('extract-types');
-    const saveAutoRadio = document.getElementById('save-auto');
-    const saveManualRadio = document.getElementById('save-manual');
     const saveFormatSelect = document.getElementById('save-format');
+    const saveFormatContainer = document.querySelector('.save-options select');
     
     let currentExtractTypes = ['text'];
     
@@ -66,26 +65,15 @@ document.addEventListener('DOMContentLoaded', function() {
         return types.map(type => typeMap[type]).join(', ');
     }
     
-    updateSelectorPlaceholder();
-    selectorTypeSelect.addEventListener('change', updateSelectorPlaceholder);
-    
-    autoModeRadio.addEventListener('change', function() {
-        if (selectorTypeSelect.value === 'class' || selectorTypeSelect.value === 'id') {
-            manualModeRadio.checked = true;
-            return;
-        }
+    function updateFormatSelectorVisibility() {
+        const hasText = currentExtractTypes.includes('text');
         
-        autoExtractGroup.style.display = 'block';
-        manualExtractGroup.style.display = 'none';
-        updateExtractType();
-        updateSaveButtonText();
-    });
-    
-    manualModeRadio.addEventListener('change', function() {
-        autoExtractGroup.style.display = 'none';
-        manualExtractGroup.style.display = 'block';
-        updateSaveButtonText();
-    });
+        if (hasText) {
+            saveFormatContainer.classList.remove('format-selector-hidden');
+        } else {
+            saveFormatContainer.classList.add('format-selector-hidden');
+        }
+    }
     
     function updateExtractType() {
         if (!autoModeRadio.checked) return;
@@ -96,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
         autoExtractTypesInput.value = displayTypes;
         
         currentExtractTypes = types;
-        
+        updateFormatSelectorVisibility();
         updateSaveButtonText();
     }
     
@@ -146,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (englishTypes.length === 0) englishTypes.push('text');
             
             currentExtractTypes = englishTypes;
+            updateFormatSelectorVisibility();
             
             if (englishTypes.length === 1) {
                 if (englishTypes[0] === 'text') saveBtn.textContent = 'Сохранить в ' + formatText;
@@ -169,7 +158,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    updateSelectorPlaceholder();
     selectorTypeSelect.addEventListener('change', updateSelectorPlaceholder);
+    
+    autoModeRadio.addEventListener('change', function() {
+        if (selectorTypeSelect.value === 'class' || selectorTypeSelect.value === 'id') {
+            manualModeRadio.checked = true;
+            return;
+        }
+        
+        autoExtractGroup.style.display = 'block';
+        manualExtractGroup.style.display = 'none';
+        updateExtractType();
+        updateSaveButtonText();
+    });
+    
+    manualModeRadio.addEventListener('change', function() {
+        autoExtractGroup.style.display = 'none';
+        manualExtractGroup.style.display = 'block';
+        updateSaveButtonText();
+    });
+    
     selectorValuesInput.addEventListener('input', updateExtractType);
     extractTypesInput.addEventListener('input', updateSaveButtonText);
     saveFormatSelect.addEventListener('change', updateSaveButtonText);
