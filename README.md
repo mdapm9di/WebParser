@@ -125,7 +125,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Changelog
 ### v1.0.0
-**Full Changelog**: https://github.com/mdapm9di/WebParser/commits/1.0.0
 - Initial release
 - Basic text, image, and video extraction
 - JSON/CSV export functionality
