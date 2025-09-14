@@ -13,8 +13,4 @@ node_modules/
 package-lock.json
 
 # CSS
-<<<<<<< HEAD
 frontend/src/styles/css
-=======
-frontend/src/styles/css
->>>>>>> db3846bf44b3226c4095a015d7a96d1f900c7abe

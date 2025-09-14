@@ -1,14 +1,6 @@
-<<<<<<< HEAD
 Flask==3.1.2
 Flask-CORS==6.0.1
 beautifulsoup4==4.12.2
 requests==2.31.0
 langdetect==1.0.9
-=======
-Flask==3.1.2
-Flask-CORS==6.0.1
-beautifulsoup4==4.12.2
-requests==2.31.0
-langdetect==1.0.9
->>>>>>> db3846bf44b3226c4095a015d7a96d1f900c7abe
 chardet==5.2.0
