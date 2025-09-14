@@ -1,7 +1,7 @@
 {
   "name": "webparser",
   "version": "1.0.0",
-  "description": "Универсальный веб-парсер",
+  "description": "WebParser is a cross-platform desktop application for website parsing. Extracts text, images, and videos using preset selectors with the ability to save results automatically or manually.",
   "main": "frontend/main.js",
   "scripts": {
     "build-css": "sass frontend/src/styles/scss:frontend/src/styles/css --watch --no-source-map",

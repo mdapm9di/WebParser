@@ -21,12 +21,10 @@ def get_page_content(session, url):
         response = session.get(url, timeout=15)
         response.raise_for_status()
         
-        # Определяем кодировку
         encoding = detect_encoding(response.content)
         if not encoding:
             encoding = 'utf-8'
             
-        # Декодируем контент с правильной кодировкой
         html = response.content.decode(encoding, errors='replace')
         
         print(f"Страница загружена, кодировка: {encoding}")

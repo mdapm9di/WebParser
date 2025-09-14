@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
         }
         
-        // Если выбран класс или ID, переключаем на ручной режим
         if (selectorType === 'class' || selectorType === 'id') {
             manualModeRadio.checked = true;
             autoExtractGroup.style.display = 'none';
@@ -70,9 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateSelectorPlaceholder();
     selectorTypeSelect.addEventListener('change', updateSelectorPlaceholder);
     
-    // Обработчики переключения режима извлечения
     autoModeRadio.addEventListener('change', function() {
-        // Не позволяем переключиться на автоматический режим для класса или ID
         if (selectorTypeSelect.value === 'class' || selectorTypeSelect.value === 'id') {
             manualModeRadio.checked = true;
             return;
@@ -90,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSaveButtonText();
     });
     
-    // Обновление типа извлечения в автоматическом режиме
     function updateExtractType() {
         if (!autoModeRadio.checked) return;
         
@@ -99,13 +95,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const displayTypes = getDisplayTypes(types);
         autoExtractTypesInput.value = displayTypes;
         
-        // Сохраняем массив типов для использования при отправке
         currentExtractTypes = types;
         
         updateSaveButtonText();
     }
     
-    // Обновление текста кнопки сохранения
     function updateSaveButtonText() {
         const saveBtn = document.getElementById('save-btn');
         const saveFormat = saveFormatSelect.value;
@@ -175,13 +169,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Слушаем изменения в селекторах и типах извлечения
     selectorTypeSelect.addEventListener('change', updateSelectorPlaceholder);
     selectorValuesInput.addEventListener('input', updateExtractType);
     extractTypesInput.addEventListener('input', updateSaveButtonText);
     saveFormatSelect.addEventListener('change', updateSaveButtonText);
     
-    // Инициализация
     updateExtractType();
     updateSaveButtonText();
 });

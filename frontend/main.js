@@ -7,7 +7,6 @@ let mainWindow;
 let flaskProcess = null;
 
 function createWindow() {
-  // Запускаем Flask сервер как дочерний процесс
   flaskProcess = spawn('python', ['backend/app.py'], {
     cwd: process.cwd(),
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -18,7 +17,6 @@ function createWindow() {
     }
   });
 
-  // Логирование вывода Flask
   flaskProcess.stdout.on('data', (data) => {
     console.log(`Flask: ${data}`);
   });
@@ -55,14 +53,12 @@ function createWindow() {
 
   mainWindow.loadFile('frontend/index.html');
   
-  // Показываем окно когда страница загрузится
   mainWindow.once('ready-to-show', () => {
     setTimeout(() => {
       mainWindow.show();
     }, 1000);
   });
   
-  // Обработчик закрытия окна
   mainWindow.on('closed', () => {
     if (flaskProcess) {
       flaskProcess.kill();
@@ -97,7 +93,6 @@ app.on('activate', () => {
   }
 });
 
-// Обработчик для сохранения файла
 ipcMain.handle('save-file', async (event, data) => {
   const { filePath } = await dialog.showSaveDialog(mainWindow, {
     defaultPath: data.filename + '.json',
@@ -118,7 +113,6 @@ ipcMain.handle('save-file', async (event, data) => {
   return { success: false, error: 'Диалог отменен' };
 });
 
-// Обработчик для выбора директории
 ipcMain.handle('select-directory', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']

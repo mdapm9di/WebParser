@@ -1,12 +1,9 @@
-# parser.py
 
 # -*- coding: utf-8 -*-
 
-
-
 import re
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Comment
 from urllib.parse import urljoin, urlparse
 from collections import OrderedDict
 
@@ -105,34 +102,56 @@ class AdvancedWebParser:
             return []
     
     def get_children_structure(self, element):
-        """Извлечение структуры детей элемента для текстового контента"""
+        """Рекурсивное извлечение структуры всех вложенных элементов"""
         structure = []
-        for child in element.children:
-            # Пропускаем пробельные текстовые узлы и комментарии
-            if isinstance(child, str):
-                text = child.strip()
+        
+        def process_node(node, depth=0):
+            """Рекурсивная обработка узла и его потомков"""
+            if isinstance(node, Comment):
+                return
+                
+            if isinstance(node, NavigableString):
+                text = node.strip()
                 if text:
+                    parent = node.parent
+                    if parent and parent.name:
+                        classes = parent.get('class', [])
+                        class_str = ' '.join(classes) if classes else None
+                        id_str = parent.get('id', None)
+                        
+                        structure.append(OrderedDict([
+                            ('tag', parent.name),
+                            ('class', class_str),
+                            ('id', id_str),
+                            ('txt', text),
+                            ('depth', depth)
+                        ]))
+                return
+            
+            if node.name in ['script', 'style', 'noscript']:
+                return
+                
+            if node.name and node.find_all(recursive=False):
+                for child in node.children:
+                    process_node(child, depth + 1)
+            else:
+                text = node.get_text(separator=' ', strip=True)
+                if text:
+                    classes = node.get('class', [])
+                    class_str = ' '.join(classes) if classes else None
+                    id_str = node.get('id', None)
+                    
                     structure.append(OrderedDict([
-                        ('tag', None),
-                        ('class', None),
-                        ('id', None),
-                        ('txt', text)
-                    ]))
-            elif child.name is not None:  # Пропускаем комментарии и другие специальные теги
-                # Это элемент
-                tag = child.name
-                classes = child.get('class', [])
-                class_str = ' '.join(classes) if classes else None
-                id_str = child.get('id', None)
-                # Извлекаем весь текст из этого ребенка (рекурсивно)
-                text = child.get_text(separator='\n', strip=True)
-                if text:  # только если есть текст
-                    structure.append(OrderedDict([
-                        ('tag', tag),
+                        ('tag', node.name),
                         ('class', class_str),
                         ('id', id_str),
-                        ('txt', text)
+                        ('txt', text),
+                        ('depth', depth)
                     ]))
+        
+        for child in element.children:
+            process_node(child)
+            
         return structure
     
     def extract_image_data(self, element):

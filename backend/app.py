@@ -1,10 +1,4 @@
-# app.py
-
-#!/usr/bin/env python3
-
 # -*- coding: utf-8 -*-
-
-
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -98,11 +92,9 @@ def parse_urls_thread(urls, selector_type, selector_values, extract_types):
                 results = parser.parse_elements(html, selector_type, selector_values, extract_type)
                 
                 for result in results:
-                    # Всегда используем structure вместо content
                     content = result.get('structure', [])
                     warning = result.get('warning', '')
                     
-                    # Если контент пустой, пропускаем
                     if not content:
                         continue
                     

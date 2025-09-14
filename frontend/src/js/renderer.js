@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Базовый URL для API
 const API_BASE = 'http://localhost:5000';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -44,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(types);
     }
     
-    // Обновление текста кнопки сохранения
     function updateSaveButtonText() {
         const saveFormat = saveFormatSelect.value;
         
@@ -113,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Функция для преобразования результатов в CSV
     function convertToCSV(results) {
         let csvContent = "URL,Type,Tag,Class,ID,Structure_Tag,Structure_Class,Structure_ID,Structure_Txt,Structure_Src\n";
         
@@ -145,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return csvContent;
     }
     
-    // Добавление нового поля URL
     addUrlBtn.addEventListener('click', () => {
         const urlRow = document.createElement('div');
         urlRow.className = 'url-row';
@@ -169,9 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         urlsContainer.appendChild(urlRow);
     });
     
-    // Запуск парсинга
     parseBtn.addEventListener('click', async () => {
-        // Получаем URL из полей ввода
         const urlInputs = document.querySelectorAll('.url-input');
         const urls = Array.from(urlInputs)
             .map(input => input.value.trim())
@@ -183,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // Получаем параметры парсинга
         const selectorType = selectorTypeSelect.value;
         const selectorValues = selectorValuesInput.value
             .split(',')
@@ -195,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // Определяем типы извлечения
         let extractTypes;
         if (autoModeRadio.checked) {
             extractTypes = currentExtractTypes;
@@ -214,13 +206,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Показываем статус
         setStatus('Парсинг...');
         output.textContent = '';
         parseBtn.disabled = true;
         
         try {
-            // Формируем данные для запроса
             const requestData = {
                 urls,
                 selector_type: selectorType,
@@ -228,13 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 extract_types: extractTypes
             };
             
-            // Отправляем запрос на бэкенд
             const response = await axios.post(`${API_BASE}/parse`, requestData);
             
             if (response.data.status === 'success') {
                 results = response.data.results;
                 
-                // Отображаем результаты
                 if (results.length > 0) {
                     let outputText = '';
                     
@@ -246,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         for (let i = 0; i < result.result.length; i++) {
                             const item = result.result[i];
                             
-                            // Добавляем предупреждения, если они есть
                             if (item.warning) {
                                 outputText += `⚠️ ${item.warning}\n`;
                             }
@@ -260,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             }
                             
-                            // Добавляем проверку на null/undefined
                             const preview = content && typeof content === 'string' 
                                 ? content.substring(0, 100) 
                                 : JSON.stringify(content || '').substring(0, 100);
@@ -289,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Сохранение результатов
     saveBtn.addEventListener('click', async () => {
         if (results.length === 0) {
             showError('Нет данных для сохранения');
@@ -301,30 +286,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const hasVideos = currentExtractTypes.includes('video');
             const hasText = currentExtractTypes.includes('text');
             
-            // Определяем папку для текстовых данных в зависимости от формата
             const textFolderName = saveFormatSelect.value === 'csv' ? 'csv' : 'json';
             
             let totalDownloaded = 0;
             let savePath = '';
             
-            // Создаем временную метку для папки
             const now = new Date();
             const timestamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
             
-            // Определяем режим сохранения
             const isAutoSave = saveAutoRadio.checked;
             
             if (isAutoSave) {
-                // Автоматическое сохранение - создаем папку outFiles на рабочем столе
                 const desktopPath = path.join(os.homedir(), 'Desktop');
                 savePath = path.join(desktopPath, 'outFiles');
                 
-                // Создаем папку outFiles, если не существует
                 if (!fs.existsSync(savePath)) {
                     fs.mkdirSync(savePath, { recursive: true });
                 }
                 
-                // Создаем подпапки для разных типов контента с временной меткой
                 if (hasImages) {
                     const imgPath = path.join(savePath, 'img', timestamp);
                     if (!fs.existsSync(imgPath)) {
@@ -346,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 setStatus('Автоматическое сохранение...');
             } else {
-                // Самостоятельное сохранение - показываем диалог выбора папки
                 const { canceled, filePaths } = await ipcRenderer.invoke('select-directory');
                 
                 if (canceled) {
@@ -356,7 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 savePath = filePaths[0];
                 
-                // Создаем подпапки для разных типов контента с временной меткой
                 if (hasImages) {
                     const imgPath = path.join(savePath, 'img', timestamp);
                     if (!fs.existsSync(imgPath)) {
@@ -379,11 +356,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 setStatus('Сохранение...');
             }
             
-            // Сохранение медиафайлов
             if (hasImages || hasVideos) {
                 setStatus('Скачивание медиафайлов...');
                 
-                // Для автоматического режима используем соответствующие подпапки с временной меткой
                 let imageSavePath = isAutoSave ? path.join(savePath, 'img', timestamp) : path.join(savePath, 'img', timestamp);
                 let videoSavePath = isAutoSave ? path.join(savePath, 'video', timestamp) : path.join(savePath, 'video', timestamp);
                 
@@ -408,7 +383,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Сохранение текста
             if (hasText) {
                 let textSavePath = isAutoSave ? 
                     path.join(savePath, textFolderName, timestamp) : 
@@ -423,7 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 try {
                     if (saveFormatSelect.value === 'json') {
-                        // Очистка текста от лишних пробелов
                         const cleanedData = cleanTextData(dataToSave);
                         fs.writeFileSync(filePath, JSON.stringify(cleanedData, null, 2));
                     } else if (saveFormatSelect.value === 'csv') {
@@ -447,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Функция для скачивания медиафайлов
     async function downloadMediaFiles(results, directory, mediaType) {
         try {
             let downloadedCount = 0;
@@ -457,7 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (const item of result.result) {
                     if (item.type !== mediaType) continue;
                     
-                    // Пропускаем элементы с предупреждениями
                     if (item.warning) continue;
                     
                     if (item.structure && item.structure.length > 0) {
@@ -467,7 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             try {
                                 const absoluteUrl = new URL(entry.src, result.url).href;
                                 
-                                // Добавляем промис скачивания в массив
                                 downloadPromises.push(
                                     downloadMediaFile(absoluteUrl, directory, mediaType)
                                         .then(success => {
@@ -485,7 +455,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // Ждем завершения всех загрузок
             await Promise.all(downloadPromises);
             
             return { success: true, count: downloadedCount };
@@ -494,10 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Функция для скачивания одного медиафайла
     async function downloadMediaFile(url, directory, mediaType) {
         try {
-            // Скачиваем файл
             const response = await axios({
                 method: 'GET',
                 url: url,
@@ -505,7 +472,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 timeout: 30000
             });
             
-            // Определяем расширение файла из URL или content-type
             let extension = getExtensionFromUrl(url);
             if (!extension) {
                 extension = mediaType === 'image' 
@@ -513,11 +479,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     : getVideoExtension(response.headers['content-type']);
             }
             
-            // Генерируем имя файла
             const fileName = `${mediaType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${extension}`;
             const filePath = path.join(directory, fileName);
             
-            // Сохраняем файл
             fs.writeFileSync(filePath, Buffer.from(response.data));
             
             console.log(`Downloaded: ${url} to ${filePath}`);
@@ -528,7 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Функция для определения расширения из URL
     function getExtensionFromUrl(url) {
         try {
             const urlObj = new URL(url);
@@ -545,7 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return null;
     }
     
-    // Вспомогательные функции для определения расширений
     function getImageExtension(contentType) {
         const extensions = {
             'image/jpeg': 'jpg',
@@ -570,7 +532,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return extensions[contentType] || 'mp4';
     }
     
-    // Функция для очистки текстовых данных от лишних пробелов
     function cleanTextData(data) {
         const cleanText = (text) => {
             if (typeof text !== 'string' || !text) return '';
@@ -605,7 +566,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Вспомогательные функции
     function setStatus(message) {
         statusBar.textContent = message;
     }
@@ -615,16 +575,13 @@ document.addEventListener('DOMContentLoaded', () => {
         output.textContent = message;
     }
     
-    // Инициализация
     updateSaveButtonText();
     
-    // Слушаем изменения режима извлечения
     autoModeRadio.addEventListener('change', updateSaveButtonText);
     manualModeRadio.addEventListener('change', updateSaveButtonText);
     extractTypesInput.addEventListener('input', updateSaveButtonText);
     saveFormatSelect.addEventListener('change', updateSaveButtonText);
     
-    // Слушаем изменения в селекторах для автоматического определения типов
     selectorValuesInput.addEventListener('input', function() {
         if (autoModeRadio.checked) {
             const types = determineExtractTypes(selectorValuesInput.value);
