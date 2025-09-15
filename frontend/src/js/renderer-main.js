@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (results.length > 0) {
                     uiUpdater.displayResults(results);
-                    uiUpdater.setStatus(`Готово. Обработано ${results.length} URL`);
+                    uiUpdater.setStatus(`Готово. Обработано ${results.length} URL`, 'ready');
                     saveBtn.disabled = false;
                 } else {
                     uiUpdater.showNoResults();
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { canceled, filePaths } = await ipcRenderer.invoke('select-directory');
                 
                 if (canceled) {
-                    uiUpdater.setStatus('Сохранение отменено');
+                    uiUpdater.setStatus('Сохранение отменено', 'not-ready');
                     return;
                 }
                 
@@ -229,12 +229,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 if (totalDownloaded > 0) {
-                    uiUpdater.setStatus(`Сохранено ${totalDownloaded} медиафайлов и текст в: ${isAutoSave ? 'папку outFiles на рабочем столе' : savePath}`);
+                    uiUpdater.setStatus(`Сохранено ${totalDownloaded} медиафайлов и текст в: ${isAutoSave ? 'папку outFiles на рабочем столе' : savePath}`, 'ready');
                 } else {
-                    uiUpdater.setStatus(`Текст сохранен в: ${isAutoSave ? `папку outFiles/${textFolderName} на рабочем столе` : savePath}`);
+                    uiUpdater.setStatus(`Текст сохранен в: ${isAutoSave ? `папку outFiles/${textFolderName} на рабочем столе` : savePath}`, 'ready');
                 }
             } else if (totalDownloaded > 0) {
-                uiUpdater.setStatus(`Сохранено ${totalDownloaded} медиафайлов в: ${isAutoSave ? 'папку outFiles на рабочем столе' : savePath}`);
+                uiUpdater.setStatus(`Сохранено ${totalDownloaded} медиафайлов в: ${isAutoSave ? 'папку outFiles на рабочем столе' : savePath}`, 'ready');
             }
         } catch (error) {
             uiUpdater.showError(`Ошибка при сохранении: ${error.message}`);

@@ -1,18 +1,61 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+import io
+import locale
+import json
+import traceback
+import subprocess
+from collections import OrderedDict
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from src.core.parser import AdvancedWebParser
-from src.utils.file_utils import generate_filename
-from collections import OrderedDict
-import json
-import os
-import traceback
+
+# Принудительно устанавливаем кодировку UTF-8
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+# Пытаемся установить локаль
+try:
+    if sys.platform.startswith('win'):
+        locale.setlocale(locale.LC_ALL, 'rus_rus')
+    else:
+        locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
+except:
+    # Если не удалось установить локаль, продолжаем без нее
+    pass
 
 app = Flask(__name__)
 CORS(app)
 
-parser = AdvancedWebParser()
+# Middleware для установки UTF-8 кодировки
+@app.after_request
+def after_request(response):
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    return response
+
+try:
+    from src.core.parser import AdvancedWebParser
+    from src.utils.file_utils import generate_filename
+    parser = AdvancedWebParser()
+except ImportError as e:
+    print(f"Import error: {e}")
+    # Создаем заглушки для случаев, когда модули не найдены
+    class AdvancedWebParser:
+        def get_page_content_playwright(self, url):
+            return "<html></html>", "utf-8"
+        def get_page_content(self, session, url):
+            return "<html></html>", "utf-8"
+        def detect_language(self, text):
+            return "en"
+        def parse_elements(self, html, selector_type, selector_values, extract_type):
+            return []
+    
+    def generate_filename(*args):
+        return "output.json"
+    
+    parser = AdvancedWebParser()
 
 @app.route('/')
 def index():
@@ -27,7 +70,7 @@ def parse_urls():
         selector_type = data.get('selector_type', 'tag')
         selector_values = data.get('selector_values', [])
         extract_types = data.get('extract_types', ['text'])
-        parse_mode = data.get('parse_mode', 'playwright')  # Новый параметр
+        parse_mode = data.get('parse_mode', 'playwright')
         
         if not urls:
             return jsonify({'error': 'Введите хотя бы один URL'}), 400
@@ -47,7 +90,7 @@ def parse_urls():
                 'status': 'success'
             }, ensure_ascii=False, sort_keys=False),
             status=200,
-            mimetype='application/json'
+            mimetype='application/json; charset=utf-8'
         )
         return response
         
@@ -59,11 +102,10 @@ def parse_urls_thread(urls, selector_type, selector_values, extract_types, parse
     
     for url in urls:
         try:
-            # Используем выбранный режим парсинга
             if parse_mode == 'playwright':
                 html, encoding = parser.get_page_content_playwright(url)
             else:
-                html, encoding = parser.get_page_content(parser.session, url)
+                html, encoding = parser.get_page_content(getattr(parser, 'session', None), url)
                 
             if not html:
                 all_results.append(OrderedDict([
@@ -77,21 +119,22 @@ def parse_urls_thread(urls, selector_type, selector_values, extract_types, parse
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html, 'html.parser')
             
-            # Дополнительная проверка на динамический контент
             if not soup.find_all(selector_values[0] if selector_values else []):
-                # Пробуем обновить страницу и подождать еще
                 if parse_mode == 'playwright':
                     html, encoding = parser.get_page_content_playwright(url)
                 else:
-                    html, encoding = parser.get_page_content(parser.session, url)
+                    html, encoding = parser.get_page_content(getattr(parser, 'session', None), url)
                 soup = BeautifulSoup(html, 'html.parser')
             
             page_text = soup.get_text()
             language = parser.detect_language(page_text)
             
             if language == 'ru':
-                from src.utils.language_utils import ensure_russian_language
-                html = ensure_russian_language(html, encoding or 'utf-8')
+                try:
+                    from src.utils.language_utils import ensure_russian_language
+                    html = ensure_russian_language(html, encoding or 'utf-8')
+                except ImportError:
+                    pass  # Пропускаем, если модуль не найден
             
             all_formatted_results = []
             for extract_type in extract_types:
@@ -136,23 +179,47 @@ def parse_urls_thread(urls, selector_type, selector_values, extract_types, parse
     
     return all_results
 
-if __name__ == '__main__':
-    # Автоматическая установка браузеров Playwright при первом запуске
+def install_playwright_browsers():
+    """Установка браузеров Playwright с правильной кодировкой"""
     try:
+        # Пытаемся использовать Python для установки
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             browser.close()
         print("Playwright браузеры уже установлены")
-    except:
+        return True
+    except Exception as e:
         print("Установка браузеров Playwright...")
-        import subprocess
-        result = subprocess.run(['python', '-m', 'playwright', 'install', '--with-deps'], 
-                              capture_output=True, text=True)
+        
+        # Устанавливаем переменные окружения для правильной кодировки
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        
+        if sys.platform.startswith('win'):
+            env['CHCP'] = '65001'  # Устанавливаем кодовую страницу UTF-8 для Windows
+        
+        # Запускаем установку браузеров
+        result = subprocess.run(
+            [sys.executable, '-m', 'playwright', 'install', '--with-deps'], 
+            capture_output=True, 
+            text=True, 
+            encoding='utf-8',
+            env=env
+        )
+        
         if result.returncode == 0:
             print("Браузеры Playwright успешно установлены")
+            return True
         else:
-            print(f"Ошибка установки браузеров: {result.stderr}")
+            error_msg = result.stderr if result.stderr else "Неизвестная ошибка"
+            print(f"Ошибка установки браузеров: {error_msg}")
+            return False
+
+if __name__ == '__main__':
+    # Устанавливаем браузеры Playwright
+    install_playwright_browsers()
     
+    # Запускаем Flask приложение
     debug = os.environ.get('FLASK_ENV') != 'production'
     app.run(debug=debug, host='0.0.0.0', port=5000, use_reloader=debug)

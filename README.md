@@ -1,25 +1,20 @@
 # WebParser
 
-A cross-platform desktop application for parsing websites built with Electron (Frontend) and Python/Flask (Backend). Extract text, images, and video data from web pages using CSS selectors with an intuitive GUI interface. Now with enhanced JavaScript rendering support through Playwright.
+A cross-platform desktop application for parsing websites built with Electron (Frontend) and Python/Flask (Backend). Extract text, images, and video data from web pages using CSS selectors with an intuitive GUI interface. Features enhanced JavaScript rendering support through Playwright and improved UI/UX design.
 
 ![screenshot](https://github.com/mdapm9di/WebParser/blob/main/preview.jpg)
 
 ## Appeal to all
 This app is a personal project that I am creating for myself. I would be happy if it was useful to someone else, and I am always open to suggestions on how to improve it. Any help and constructive criticism is most welcome
 
-## Technology Stack
-- **Frontend:** Electron, HTML5, SCSS/CSS3, JS (ES6+), Axios
-- **Backend:** Python 3.8+, Flask, BeautifulSoup4, Requests, Playwright, Langdetect, Chardet
-- **Development Tools:** Node.js & npm, Sass, Concurrently, Wait-on, Electron Builder
-
 ## Features
 
-- **Desktop GUI** - Native application experience with dark theme UI
+- **Modern Dark UI** - Redesigned interface with improved visual aesthetics
+- **Dual Parsing Engine** - Choose between fast Requests mode or Playwright for JavaScript-heavy sites
 - **Multi-URL Processing** - Parse multiple websites simultaneously
 - **Flexible Selectors** - Extract elements by tag, class, or ID
 - **Multiple Data Types** - Support for text, images, and video content
-- **Dual Parsing Modes** - Choose between fast Requests mode or Playwright for JavaScript-heavy sites
-- **Smart Language Detection** - Automatic Russian language encoding correction
+- **Smart Encoding Detection** - Automatic UTF-8 encoding and Russian language support
 - **Export Options** - Save results as JSON or CSV
 - **Media Downloading** - Automatically download images and videos
 - **Auto-Save Functionality** - Results are automatically organized in dated folders
@@ -29,30 +24,39 @@ This app is a personal project that I am creating for myself. I would be happy i
 
 ```
 webparser/
-├── backend/                 
+├── backend/               
 │   ├── src/
 │   │   ├── core/
-│   │   │   └── parser.py          
+│   │   │   └── parser.py           
 │   │   └── utils/
 │   │       ├── language_utils.py   
 │   │       ├── file_utils.py       
 │   │       └── network_utils.py    
-│   └── app.py             
-├── frontend/               
+│   └── app.py              
+├── frontend/              
 │   ├── src/
 │   │   ├── js/
-│   │   │   ├── renderer-main.js    
+│   │   │   ├── renderer-main.js   
 │   │   │   ├── content-extractor-ui.js 
 │   │   │   ├── api-client.js       
-│   │   │   ├── file-saver.js       
-│   │   │   ├── ui-updater.js     
-│   │   │   └── url-manager.js    
+│   │   │   ├── file-saver.js     
+│   │   │   ├── ui-updater.js      
+│   │   │   └── url-manager.js   
 │   │   └── styles/
-│   │       └── scss/
-│   │           └── style.scss      
-│   ├── index.html        
-│   └── main.js             
-├── requirements.txt      
+│   │       ├── scss/
+│   │       │   ├── style.scss    
+│   │       │   ├── _variables.scss 
+│   │       │   ├── _config.scss   
+│   │       │   ├── _components.scss 
+│   │       │   ├── _layout.scss  
+│   │       │   ├── _reset.scss   
+│   │       │   ├── _utilities.scss 
+│   │       │   └── _media-queries.scss 
+│   │       └── css/
+│   │           └── style.css     
+│   ├── index.html         
+│   └── main.js            
+├── requirements.txt        
 └── package.json          
 ```
 
@@ -98,11 +102,6 @@ npm run build-css-once
 npm start
 ```
 
-For development with auto-reload:
-```bash
-npm run dev
-```
-
 **One-command installation:**
 ```bash
 npm run install-all
@@ -136,14 +135,16 @@ The application consists of two main parts:
 
 ### Key Improvements
 
-- **Modular Architecture**: Code is now organized into specialized classes
+- **Modular Architecture**: Code organized into specialized classes
+- **Enhanced UI/UX**: Modern dark theme with improved visual design
 - **Playwright Integration**: Full support for JavaScript-rendered content
-- **Enhanced Error Handling**: Better error reporting and fallback mechanisms
+- **UTF-8 Encoding**: Proper handling of character encoding
+- **Error Handling**: Robust error reporting and fallback mechanisms
 - **Performance Optimizations**: Batch processing for media downloads
 
 To modify the application:
 
-- Edit frontend styles in `frontend/src/styles/scss/style.scss`
+- Edit frontend styles in `frontend/src/styles/scss/` files
 - Modify parsing logic in `backend/src/core/parser.py`
 - Change UI behavior in `frontend/src/js/renderer-main.js`
 
@@ -179,7 +180,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Changelog
 
-### v1.1.0
+### v1.0.2
+- Complete UI redesign with modern dark theme
+- Enhanced UTF-8 encoding support
+- Improved error handling and status reporting
+- Better responsive design for mobile devices
+- SVG icons and visual improvements
+
+### v1.0.1
 - Added Playwright support for JavaScript-rendered websites
 - Improved modular architecture with separated concerns
 - Enhanced error handling and fallback mechanisms
@@ -191,5 +199,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Basic text, image, and video extraction
 - JSON/CSV export functionality
 - Automatic Russian encoding detection
+
 
 For questions or support, please open an issue on GitHub.

@@ -4,12 +4,24 @@ class UiUpdater {
         this.output = document.getElementById(outputId);
     }
 
-    setStatus(message) {
+    setStatus(message, type = 'default') {
         this.statusBar.textContent = message;
+        
+        // Удаляем все классы статусов
+        this.statusBar.classList.remove('status-ready', 'status-not-ready', 'status-error');
+        
+        // Добавляем соответствующий класс в зависимости от типа
+        if (type === 'ready') {
+            this.statusBar.classList.add('status-ready');
+        } else if (type === 'error') {
+            this.statusBar.classList.add('status-error');
+        } else if (type === 'not-ready') {
+            this.statusBar.classList.add('status-not-ready');
+        }
     }
 
     showError(message) {
-        this.setStatus(`Ошибка: ${message}`);
+        this.setStatus(`Ошибка: ${message}`, 'error');
         this.output.textContent = message;
     }
 
@@ -57,7 +69,7 @@ class UiUpdater {
 
     showNoResults() {
         this.output.textContent = 'Элементы не найдены на указанных URL';
-        this.setStatus('Готово. Элементы не найдены');
+        this.setStatus('Готово. Элементы не найдены', 'ready');
     }
 }
 

@@ -7,15 +7,21 @@ let mainWindow;
 let flaskProcess = null;
 
 function createWindow() {
-  flaskProcess = spawn('python', ['backend/app.py'], {
+  flaskProcess = spawn('python', ['-X', 'utf8', 'backend/app.py'], {
     cwd: process.cwd(),
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { 
       ...process.env, 
       FLASK_ENV: 'production',
-      FLASK_DEBUG: '0'
+      FLASK_DEBUG: '0',
+      PYTHONIOENCODING: 'utf-8',
+      PYTHONUTF8: '1'
     }
   });
+
+  // Устанавливаем кодировку для потоков
+  flaskProcess.stdout.setEncoding('utf8');
+  flaskProcess.stderr.setEncoding('utf8');
 
   flaskProcess.stdout.on('data', (data) => {
     console.log(`Flask: ${data}`);
@@ -35,8 +41,8 @@ function createWindow() {
   });
 
   mainWindow = new BrowserWindow({
-    width: 400,
-    height: 950,
+    width: 420,
+    height: 1010,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -81,20 +87,16 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', (event) => {
-  // Отменяем немедленный выход
   event.preventDefault();
   
   if (flaskProcess) {
-    // Убиваем процесс и ждем его завершения
     flaskProcess.kill('SIGTERM');
     
-    // Ждем завершения процесса перед выходом
     flaskProcess.once('exit', () => {
       flaskProcess = null;
       app.exit(0);
     });
     
-    // Таймаут на случай, если процесс не завершится
     setTimeout(() => {
       if (flaskProcess) {
         flaskProcess.kill('SIGKILL');

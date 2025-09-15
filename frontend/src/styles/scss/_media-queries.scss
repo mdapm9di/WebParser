@@ -1,0 +1,31 @@
+@use 'config' as *;
+
+@media (max-width: 400px) {
+  body {
+    padding: 8px;
+  }
+  
+  .radio-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .radio-label {
+    margin-right: 0;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .radio-label:last-child {
+    margin-bottom: 0;
+  }
+  
+  .save-options {
+    grid-template-columns: 1fr;
+  }
+  
+  #output {
+    min-height: 100px;
+    max-height: 180px;
+  }
+}
