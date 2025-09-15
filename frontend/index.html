@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebParser</title>
+    <link rel="stylesheet" href="src/styles/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Блок 1: Ссылки для парсинга -->
+        <div class="section">
+            <h2>Ссылки для парсинга</h2>
+            <div class="setting-group">
+                <label>Введите ссылку:</label>
+                <div id="urls-container">
+                    <div class="url-row">
+                        <input type="text" class="url-input" placeholder="https://example.com">
+                        <button class="remove-url-btn" style="display: none;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button id="add-url-btn" class="add-btn" title="Добавить URL">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                    </svg>
+                    Добавить URL
+                </button>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+        
+        <!-- Блок 2: Настройки селектора -->
+        <div class="section">
+            <h2>Настройки селектора</h2>
+            <div class="setting-group">
+                <label for="selector-type">Тип селектора:</label>
+                <select id="selector-type">
+                    <option value="tag">tag (div, p, span, a, h1)</option>
+                    <option value="class">class (.class-name)</option>
+                    <option value="id">id (#element-id)</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <label for="selector-values">Названия через запятую:</label>
+                <input type="text" id="selector-values" placeholder="div, p, a">
+            </div>
+        </div>
+        
+        <!-- Блок 3: Способ извлечения -->
+        <div class="section">
+            <h2>Способ извлечения</h2>
+            <div class="setting-group">
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" id="auto-mode" name="extract-mode" value="auto" checked>
+                        <span class="inner-label">Автоматический</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" id="manual-mode" name="extract-mode" value="manual">
+                        <span class="inner-label">Ручной</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="auto-extract-group" class="setting-group">
+                <label for="auto-extract-types">Способы извлечения:</label>
+                <input type="text" id="auto-extract-types" disabled>
+            </div>
+            
+            <div id="manual-extract-group" class="setting-group" style="display: none;">
+                <label for="extract-types">Типы извлечения:</label>
+                <input type="text" id="extract-types" placeholder="txt, img, video">
+            </div>
+        </div>
+
+        <!-- Блок 4: Режим парсинга -->
+        <div class="section">
+            <h2>Режим парсинга</h2>
+            <div class="setting-group">
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" id="mode-requests" name="parse-mode" value="requests">
+                        <span class="inner-label">Обычный (быстрый)</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" id="mode-playwright" name="parse-mode" value="playwright" checked>
+                        <span class="inner-label">Playwright (JS)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <button id="parse-btn" class="primary-btn">Начать парсинг</button>
+        
+        <div class="divider"></div>
+        
+        <!-- Блок 5: Результат парсинга -->
+        <div class="section">
+            <h2>Результат парсинга</h2>
+            <div id="results">
+                <div id="status-bar" class="status-ready">Готов к работе</div>
+                <div id="output"></div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Блок 6: Режим сохранения -->
+        <div class="section">
+            <h2>Режим сохранения</h2>
+            <div class="setting-group">
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" id="save-auto" name="save-mode" value="auto" checked>
+                        <span class="inner-label">Автосохранение</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" id="save-manual" name="save-mode" value="manual">
+                        <span class="inner-label">Ручное сохранение</span>
+                    </label>
+                </div>
+            </div>
+            <div class="setting-group" style="margin: 0;">
+                <div class="save-options">
+                    <select id="save-format">
+                        <option value="json">.json</option>
+                        <option value="csv">.csv</option>
+                    </select>
+                    <button id="save-btn" class="secondary-btn" disabled>Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./src/js/content-extractor-ui.js"></script>
+    <script src="./src/js/renderer-main.js"></script>
+</body>
+</html>
