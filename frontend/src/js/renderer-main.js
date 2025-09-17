@@ -7,13 +7,11 @@ const os = require('os');
 const API_BASE = 'http://localhost:5000';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Импорты модулей
     const { UrlManager } = require('./src/js/url-manager.js');
     const { ApiClient } = require('./src/js/api-client');
     const { FileSaver } = require('./src/js/file-saver');
     const { UiUpdater } = require('./src/js/ui-updater');
 
-    // Инициализация модулей
     const urlManager = new UrlManager('urls-container', 'add-url-btn');
     const apiClient = new ApiClient(API_BASE);
     const fileSaver = new FileSaver();
@@ -31,11 +29,144 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveManualRadio = document.getElementById('save-manual');
     const saveFormatSelect = document.getElementById('save-format');
     const saveFormatContainer = document.querySelector('.save-options select');
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    const dragRegion = document.createElement('div');
+    dragRegion.style.position = 'fixed';
+    dragRegion.style.top = '0';
+    dragRegion.style.left = '0';
+    dragRegion.style.width = '100%';
+    dragRegion.style.height = '30px';
+    dragRegion.style.webkitAppRegion = 'drag';
+    dragRegion.style.zIndex = '1000';
+    dragRegion.style.display = 'flex';
+    dragRegion.style.justifyContent = 'space-between';
+    dragRegion.style.alignItems = 'center';
+    dragRegion.style.padding = '0 0 0 15px';
+    document.body.appendChild(dragRegion);
+
+    const titleText = document.createElement('span');
+    titleText.textContent = 'WebParser';
+    titleText.style.fontSize = '12px';
+    titleText.style.fontWeight = 'normal';
+    titleText.style.pointerEvents = 'none';
+    dragRegion.appendChild(titleText);
+
+    const windowControls = document.createElement('div');
+    windowControls.style.display = 'flex';
+    windowControls.style.webkitAppRegion = 'no-drag';
+    windowControls.style.height = '30px';
+    dragRegion.appendChild(windowControls);
+
+    const minimizeBtn = document.createElement('button');
+    minimizeBtn.innerHTML = '&#x2013;';
+    minimizeBtn.style.width = '46px';
+    minimizeBtn.style.height = '30px';
+    minimizeBtn.style.border = 'none';
+    minimizeBtn.style.background = 'none';
+    minimizeBtn.style.fontSize = '12px';
+    minimizeBtn.style.cursor = 'pointer';
+    minimizeBtn.style.display = 'flex';
+    minimizeBtn.style.alignItems = 'center';
+    minimizeBtn.style.justifyContent = 'center';
+    minimizeBtn.style.transition = 'background-color 0.2s ease';
+    minimizeBtn.style.borderRadius = '0';
+    minimizeBtn.style.boxSizing = 'border-box';
+    minimizeBtn.style.margin = '0';
+    minimizeBtn.style.padding = '0';
+    minimizeBtn.style.lineHeight = '30px';
+    minimizeBtn.addEventListener('click', () => {
+        ipcRenderer.invoke('minimize-window');
+    });
+    windowControls.appendChild(minimizeBtn);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '&#x2715;';
+    closeBtn.style.width = '46px';
+    closeBtn.style.height = '30px';
+    closeBtn.style.border = 'none';
+    closeBtn.style.background = 'none';
+    closeBtn.style.fontSize = '12px';
+    closeBtn.style.fontWeight = 'normal';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.display = 'flex';
+    closeBtn.style.alignItems = 'center';
+    closeBtn.style.justifyContent = 'center';
+    closeBtn.style.transition = 'background-color 0.2s ease';
+    closeBtn.style.borderRadius = '0';
+    closeBtn.style.boxSizing = 'border-box';
+    closeBtn.style.margin = '0';
+    closeBtn.style.padding = '0';
+    closeBtn.style.lineHeight = '30px';
+    closeBtn.addEventListener('click', () => {
+        ipcRenderer.invoke('close-window');
+    });
+    windowControls.appendChild(closeBtn);
     
     let results = [];
     let currentExtractTypes = ['text'];
+
+    const mainContent = document.querySelector('.container') || document.body;
+    mainContent.style.marginTop = '30px';
+    mainContent.style.height = 'calc(100% - 30px)';
+
+    function updateWindowControlsColors() {
+        const isLightTheme = document.body.classList.contains('light-theme');
+        
+        dragRegion.style.backgroundColor = isLightTheme ? '#f5f5f5' : '#111111';
+        
+        titleText.style.color = isLightTheme ? '#888888' : '#888888';
+        
+        minimizeBtn.style.color = isLightTheme ? '#888888' : '#ffffffff';
+        closeBtn.style.color = isLightTheme ? '#888888' : '#ffffffff';
+        
+        minimizeBtn.onmouseover = () => {
+            minimizeBtn.style.backgroundColor = isLightTheme ? '#e5e5e5' : '#3d3d3d3b';
+            minimizeBtn.style.transform = 'translateY(0)';
+        };
+        minimizeBtn.onmouseout = () => {
+            minimizeBtn.style.backgroundColor = 'transparent';
+            minimizeBtn.style.transform = 'translateY(0)';
+        };
+        
+        closeBtn.onmouseover = () => {
+            closeBtn.style.backgroundColor = '#ff0000ff';
+            closeBtn.style.color = '#f5f5f5';
+            closeBtn.style.transform = 'translateY(0)';
+        };
+        closeBtn.onmouseout = () => {
+            closeBtn.style.backgroundColor = 'transparent';
+            closeBtn.style.color = isLightTheme ? '#111111' : '#f5f5f5';
+            closeBtn.style.transform = 'translateY(0)';
+        };
+    }
+
+    themeToggle.addEventListener('click', () => {
+        const body = document.body;
+        body.classList.toggle('light-theme');
+        
+        const isLightTheme = body.classList.contains('light-theme');
+        localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+        
+        updateWindowControlsColors();
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+    } else {
+        document.body.classList.remove('light-theme');
+    }
+
+    setTimeout(updateWindowControlsColors, 100);
+
+    const interactiveElements = document.querySelectorAll('button, input, select, textarea');
+    interactiveElements.forEach(el => {
+        if (el.offsetTop < 30) {
+            el.style.webkitAppRegion = 'no-drag';
+        }
+    });
     
-    // Обработчики событий
     parseBtn.addEventListener('click', async () => {
         const urls = urlManager.getUrls();
         
@@ -241,7 +372,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Обновление интерфейса
     function updateFormatSelectorVisibility() {
         const hasText = currentExtractTypes.includes('text');
         
@@ -338,7 +468,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(types);
     }
     
-    // Инициализация обработчиков
     updateSaveButtonText();
     
     autoModeRadio.addEventListener('change', updateSaveButtonText);

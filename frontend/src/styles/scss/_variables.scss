@@ -15,4 +15,28 @@
   --disabled-opacity: 0.4;
   --border-color: #2a2a2a;
   --focus-glow: 0 0 0 2px rgba(3, 218, 198, 0.2);
+  --checked: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='3 1 16 16'%3E%3Cpath d='M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z'/%3E%3C/svg%3E");
+  --border-bottom-input: 1px dashed rgba(255, 255, 255, 0.25);
+  --border-bottom-input-focus: 1px solid rgba(255, 255, 255, 0.75);
+  --border-bottom-transition: border-bottom 0.5s ease;
+}
+
+.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #e0e0e0;
+  --accent-primary: #333333;
+  --accent-secondary: #000000;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-label: #888888;
+  --success: #00c853;
+  --warning: #ffab00;
+  --error: #ff5252;
+  --border-color: #cccccc;
+  --focus-glow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+  --checked: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='black' viewBox='3 1 16 16'%3E%3Cpath d='M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z'/%3E%3C/svg%3E");
+  --border-bottom-input: 1px dashed rgba(0, 0, 0, 0.35);
+  --border-bottom-input-focus: 1px solid rgba(0, 0, 0, 0.75);
+  --border-bottom-transition: border-bottom 0.5s ease;
 }

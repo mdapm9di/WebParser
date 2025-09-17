@@ -172,12 +172,10 @@ class FileSaver {
                 }
             }
             
-            // Ограничиваем количество одновременных запросов
             const batchSize = 5;
             for (let i = 0; i < downloadPromises.length; i += batchSize) {
                 const batch = downloadPromises.slice(i, i + batchSize);
                 await Promise.all(batch);
-                // Небольшая задержка между батчами
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
             

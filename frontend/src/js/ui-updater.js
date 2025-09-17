@@ -7,10 +7,8 @@ class UiUpdater {
     setStatus(message, type = 'default') {
         this.statusBar.textContent = message;
         
-        // Удаляем все классы статусов
         this.statusBar.classList.remove('status-ready', 'status-not-ready', 'status-error');
         
-        // Добавляем соответствующий класс в зависимости от типа
         if (type === 'ready') {
             this.statusBar.classList.add('status-ready');
         } else if (type === 'error') {
