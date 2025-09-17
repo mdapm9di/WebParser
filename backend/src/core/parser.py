@@ -29,20 +29,15 @@ class AdvancedWebParser:
                 )
                 page = context.new_page()
                 
-                # Увеличиваем таймаут и ждем полной загрузки
                 page.goto(url, wait_until='domcontentloaded', timeout=60000)
                 
-                # Ждем полной загрузки страницы и выполнения JavaScript
                 page.wait_for_load_state('networkidle', timeout=30000)
                 
-                # Дополнительное ожидание для динамического контентa
                 page.wait_for_timeout(5000)
                 
-                # Прокручиваем страницу для загрузки ленивого контента
                 page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                 page.wait_for_timeout(5000)
                 
-                # Получаем HTML после выполнения JavaScript
                 html = page.content()
                 
                 browser.close()
@@ -50,7 +45,6 @@ class AdvancedWebParser:
                 
         except Exception as e:
             print(f"Ошибка Playwright для {url}: {str(e)}")
-            # Fallback на традиционный метод
             try:
                 html, encoding = self.get_page_content(self.session, url)
                 return html, encoding
@@ -114,10 +108,8 @@ class AdvancedWebParser:
                 
                 if selector_type in ['class', 'id']:
                     if extract_type == 'image' and elem.name != 'img':
-                        # Больше не показываем предупреждение, так как теперь ищем изображения рекурсивно
                         pass
                     elif extract_type == 'video' and elem.name != 'video':
-                        # Больше не показываем предупреждение, так как теперь ищем видео рекурсивно
                         pass
                 
                 if extract_type == 'text':
@@ -227,13 +219,11 @@ class AdvancedWebParser:
                                 ('src', url)
                             ]))
                 
-                # Рекурсивно обрабатываем всех потомков
                 if hasattr(elem, 'children'):
                     for child in elem.children:
                         if child.name:
                             extract_images_recursive(child)
             
-            # Начинаем рекурсивный поиск с переданного элемента
             extract_images_recursive(element)
                     
             return structure
@@ -286,13 +276,11 @@ class AdvancedWebParser:
                                 ('src', source_src)
                             ]))
                 
-                # Рекурсивно обрабатываем всех потомков
                 if hasattr(elem, 'children'):
                     for child in elem.children:
                         if child.name:
                             extract_videos_recursive(child)
             
-            # Начинаем рекурсивный поиск с переданного элемента
             extract_videos_recursive(element)
                     
             return structure

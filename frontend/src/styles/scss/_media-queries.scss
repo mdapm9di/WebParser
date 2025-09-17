@@ -1,4 +1,22 @@
-@use 'config' as *;
+@media (max-width: 100px) {
+  .app-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .left-panel {
+    flex-direction: row;
+    width: 100%;
+    height: auto;
+    padding: 8px 12px;
+  }
+  
+  .panel-buttons-top,
+  .panel-buttons-bottom {
+    flex-direction: row;
+    gap: 16px;
+  }
+}
 
 @media (max-width: 400px) {
   body {
@@ -27,5 +45,14 @@
   #output {
     min-height: 100px;
     max-height: 180px;
+  }
+  
+  .left-panel {
+    padding: 8px;
+  }
+  
+  .panel-buttons-top,
+  .panel-buttons-bottom {
+    gap: 8px;
   }
 }

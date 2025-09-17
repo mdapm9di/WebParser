@@ -19,7 +19,6 @@ function createWindow() {
     }
   });
 
-  // Устанавливаем кодировку для потоков
   flaskProcess.stdout.setEncoding('utf8');
   flaskProcess.stderr.setEncoding('utf8');
 
@@ -41,8 +40,8 @@ function createWindow() {
   });
 
   mainWindow = new BrowserWindow({
-    width: 420,
-    height: 1010,
+    width: 457,
+    height: 1000,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -54,7 +53,8 @@ function createWindow() {
     fullscreenable: false,
     icon: path.join(__dirname, '../assets/icon.png'),
     autoHideMenuBar: true,
-    show: false
+    show: false,
+    titleBarStyle: 'hidden'
   });
 
   mainWindow.loadFile('frontend/index.html');
@@ -141,4 +141,25 @@ ipcMain.handle('select-directory', async () => {
   });
   
   return result;
+});
+
+ipcMain.handle('update-titlebar-color', (event, isLightTheme) => {
+    if (mainWindow) {
+        mainWindow.setTitleBarOverlay({
+            color: isLightTheme ? '#f5f5f5' : '#111111',
+            symbolColor: isLightTheme ? '#111111' : '#f5f5f5'
+        });
+    }
+});
+
+ipcMain.handle('minimize-window', () => {
+    if (mainWindow) {
+        mainWindow.minimize();
+    }
+});
+
+ipcMain.handle('close-window', () => {
+    if (mainWindow) {
+        mainWindow.close();
+    }
 });
