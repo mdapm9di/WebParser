@@ -1,8 +1,5 @@
 # WebParser
 
-### A short description
-**To describe what is happening**
-
 At this point in development, I decided to remove the description from README.md for convenience, and not be distracted by editing the application's changelog. When the first release of the application appears, I will make a description
 
 As of September 17, 2025, some buttons on the left panel don't work, only theme changes. Translation of the application, a link to GitHub, and settings will be added, but not anytime soon due to lack of free time.
